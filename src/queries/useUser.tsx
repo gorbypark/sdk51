@@ -76,7 +76,7 @@ const useLogin = () => {
   });
 };
 
-const useFetchUserView = () => {
+const useUserView = () => {
   const token = useQueryClient().getQueryData<string>(["token"]);
 
   return useQuery<UserInfo>({
@@ -88,16 +88,16 @@ const useFetchUserView = () => {
 };
 
 const useUserInfo = () => {
-  const { data, isLoading } = useFetchUserView();
+  const { data, isFetching } = useUserView();
   const token = useQueryClient().getQueryData<string>(["token"]);
 
   return {
-    isLoading: isLoading,
-    token,
+    isLoading: isFetching,
+    token: token ?? null,
     isLoggedIn: !!token,
-    rol: data?.data.rol,
-    usuarioId: data?.data.id,
-    empresaId: data?.empresa.empresa_id,
+    rol: data?.data.rol ?? null,
+    usuarioId: data?.data.id ?? null,
+    empresaId: data?.empresa.empresa_id ?? null,
   };
 };
 
