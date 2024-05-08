@@ -83,6 +83,7 @@ const useFetchUserView = () => {
     queryKey: ["userInfo"],
     queryFn: () => userInfoFn(token!),
     enabled: !!token, // Only run if we have a token
+    refetchInterval: 15000, // 15 seconds!! only for demonstration purposes right now
   });
 };
 
