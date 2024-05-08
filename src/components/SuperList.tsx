@@ -1,5 +1,4 @@
-import { SymbolView } from "expo-symbols";
-import { PlatformColor, Pressable } from "react-native";
+import { PlatformColor } from "react-native";
 import {
   Section,
   List,
