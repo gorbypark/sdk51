@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useRouter } from "expo-router";
 
 type LoginResponse = {
   data: {
@@ -41,7 +43,6 @@ const loginUserFn = async (
 };
 
 const userInfoFn = async (token: string): Promise<UserInfo> => {
-  console.log("fetch user info queryfn", token);
   const response = await fetch(
     "http://api.controldejornadalaboral.loc:8080/user/view",
     {
@@ -54,17 +55,17 @@ const userInfoFn = async (token: string): Promise<UserInfo> => {
   if (!response.ok) {
     throw new Error("Failed to fetch user info");
   }
+
   return response.json();
 };
 
-const useLogin = () => {
+const useSignIn = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       loginUserFn(email, password),
     onSuccess: async (data) => {
-      console.log("success!");
       await queryClient.setQueryData(["token"], data.data.access_token);
       queryClient.invalidateQueries({
         queryKey: ["userInfo"],
@@ -74,6 +75,17 @@ const useLogin = () => {
       alert(err);
     },
   });
+};
+
+const useSignOut = () => {
+  const queryClient = useQueryClient();
+  return () => {
+    queryClient.invalidateQueries({ queryKey: ["userInfo"] });
+    queryClient.removeQueries({ queryKey: ["userInfo"] });
+
+    queryClient.invalidateQueries({ queryKey: ["token"] });
+    queryClient.setQueryData(["token"], null);
+  };
 };
 
 const useUserView = () => {
@@ -92,7 +104,7 @@ const useUserInfo = () => {
   const token = useQueryClient().getQueryData<string>(["token"]);
 
   return {
-    isLoading: isFetching,
+    isLoading: false,
     token: token ?? null,
     isLoggedIn: !!token,
     rol: data?.data.rol ?? null,
@@ -101,4 +113,29 @@ const useUserInfo = () => {
   };
 };
 
-export { useLogin, useUserInfo };
+const useRedirectByRol = () => {
+  const data = useUserInfo();
+  const router = useRouter();
+
+  return useEffect(() => {
+    if (data.rol !== null) {
+      switch (data.rol) {
+        case 0:
+          router.replace("/worker");
+          break;
+        case 1:
+          router.replace("/admin");
+          break;
+        case 2:
+          router.replace("/manager");
+          break;
+        case 4:
+          alert("pin not supported");
+        default:
+          alert("default");
+      }
+    }
+  }, [data.rol]);
+};
+
+export { useSignIn, useSignOut, useUserInfo, useRedirectByRol };

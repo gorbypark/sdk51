@@ -1,22 +1,31 @@
 import { View, TextInput, Button, Text } from "react-native";
 import { useState } from "react";
 
-import { useLogin, useUserInfo } from "@/src/queries/useUser";
+import {
+  useSignIn,
+  useUserInfo,
+  useSignOut,
+  useRedirectByRol,
+} from "@/src/queries/useUser";
 
 export default function Index() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const { mutate } = useLogin();
+  const { mutate } = useSignIn();
   const data = useUserInfo();
+  const signOut = useSignOut();
 
   const handleLogin = () => {
     mutate({ email, password });
   };
 
+  useRedirectByRol();
+
   return (
     <View
       style={{
+        padding: 100,
         flex: 1,
         backgroundColor: "black",
       }}
@@ -47,7 +56,17 @@ export default function Index() {
           color: "white",
         }}
       />
-      <Button title="Sign In" onPress={() => handleLogin()} />
+      <Button
+        title={"Sign In"}
+        onPress={() => handleLogin()}
+        disabled={data.isLoggedIn}
+      />
+      <Button
+        title={"Sign Out"}
+        onPress={() => signOut()}
+        disabled={!data.isLoggedIn}
+      />
+
       <Text style={{ color: "white" }}>{JSON.stringify(data, null, 2)}</Text>
     </View>
   );
