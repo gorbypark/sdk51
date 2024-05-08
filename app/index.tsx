@@ -1,15 +1,16 @@
-import { Text, View } from "react-native";
+import { View, PlatformColor } from "react-native";
+
+import { SuperList } from "@/src/components/SuperList";
 
 export default function Index() {
   return (
     <View
       style={{
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        backgroundColor: PlatformColor("systemBackground"),
       }}
     >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+      <SuperList />
     </View>
   );
 }
