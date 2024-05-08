@@ -5,9 +5,11 @@ import { useRedirectByRol } from "@/src/queries/useUser";
 export default function AppLayout() {
   const data = useUserInfo();
 
+  // Redirects the user based on their rol.
   useRedirectByRol();
 
-  if (!data.token) {
+  // Redirects user if they are not logged in
+  if (!data.isLoggedIn) {
     return <Redirect href="/signin" />;
   }
 

@@ -21,7 +21,7 @@ type UserInfo = {
   };
 };
 
-// query function for signing in the user
+// Query function for signing in the user
 const loginUserFn = async (
   email: string,
   password: string
