@@ -4,8 +4,7 @@ import { useState } from "react";
 import {
   useSignIn,
   useUserInfo,
-  useSignOut,
-  useRedirectByRol,
+  useRedirectOnSignIn,
 } from "@/src/queries/useUser";
 
 export default function Index() {
@@ -14,13 +13,12 @@ export default function Index() {
 
   const { mutate } = useSignIn();
   const data = useUserInfo();
-  const signOut = useSignOut();
 
   const handleLogin = () => {
     mutate({ email, password });
   };
 
-  useRedirectByRol();
+  useRedirectOnSignIn();
 
   return (
     <View
@@ -61,12 +59,6 @@ export default function Index() {
         onPress={() => handleLogin()}
         disabled={data.isLoggedIn}
       />
-      <Button
-        title={"Sign Out"}
-        onPress={() => signOut()}
-        disabled={!data.isLoggedIn}
-      />
-
       <Text style={{ color: "white" }}>{JSON.stringify(data, null, 2)}</Text>
     </View>
   );

@@ -21,6 +21,7 @@ type UserInfo = {
   };
 };
 
+// query function for signing in the user
 const loginUserFn = async (
   email: string,
   password: string
@@ -42,6 +43,7 @@ const loginUserFn = async (
   return response.json();
 };
 
+// Mutation function for getting user/view
 const userInfoFn = async (token: string): Promise<UserInfo> => {
   const response = await fetch(
     "http://api.controldejornadalaboral.loc:8080/user/view",
@@ -59,6 +61,7 @@ const userInfoFn = async (token: string): Promise<UserInfo> => {
   return response.json();
 };
 
+// Mutation for user/login
 const useSignIn = () => {
   const queryClient = useQueryClient();
 
@@ -77,6 +80,7 @@ const useSignIn = () => {
   });
 };
 
+// Clears the queries and sets token to null, this will trigger a redirect back to the sign in page
 const useSignOut = () => {
   const queryClient = useQueryClient();
   return () => {
@@ -87,7 +91,7 @@ const useSignOut = () => {
     queryClient.setQueryData(["token"], null);
   };
 };
-
+// Query that gets user/view
 const useUserView = () => {
   const token = useQueryClient().getQueryData<string>(["token"]);
 
@@ -99,20 +103,22 @@ const useUserView = () => {
   });
 };
 
+// Returns a blend of user/login data (the token), user/view data (rol, empresa_id, usuario_id, etc) and a boolean for isLoggedIn
 const useUserInfo = () => {
   const { data, isFetching } = useUserView();
   const token = useQueryClient().getQueryData<string>(["token"]);
 
   return {
-    isLoading: false,
-    token: token ?? null,
     isLoggedIn: !!token,
+    token: token ?? null,
+    isLoading: isFetching,
     rol: data?.data.rol ?? null,
     usuarioId: data?.data.id ?? null,
     empresaId: data?.empresa.empresa_id ?? null,
   };
 };
 
+// Redirects the user based on their role.
 const useRedirectByRol = () => {
   const data = useUserInfo();
   const router = useRouter();
@@ -121,13 +127,13 @@ const useRedirectByRol = () => {
     if (data.rol !== null) {
       switch (data.rol) {
         case 0:
-          router.replace("/worker");
+          router.replace("/(app)/(worker)/");
           break;
         case 1:
-          router.replace("/admin");
+          router.replace("/(app)/(admin)/");
           break;
         case 2:
-          router.replace("/manager");
+          router.replace("/(app)/(manager)/");
           break;
         case 4:
           alert("pin not supported");
@@ -138,4 +144,22 @@ const useRedirectByRol = () => {
   }, [data.rol]);
 };
 
-export { useSignIn, useSignOut, useUserInfo, useRedirectByRol };
+// Redirects user on successful sign in
+const useRedirectOnSignIn = () => {
+  const data = useUserInfo();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (data.token) {
+      router.replace("/(app)/");
+    }
+  }, [data.token]);
+};
+
+export {
+  useSignIn,
+  useSignOut,
+  useUserInfo,
+  useRedirectByRol,
+  useRedirectOnSignIn,
+};
