@@ -54,11 +54,7 @@ export default function Index() {
           color: "white",
         }}
       />
-      <Button
-        title={"Sign In"}
-        onPress={() => handleLogin()}
-        disabled={data.isLoggedIn}
-      />
+      <Button title={"Sign In"} onPress={() => handleLogin()} />
       <Text style={{ color: "white" }}>{JSON.stringify(data, null, 2)}</Text>
     </View>
   );
