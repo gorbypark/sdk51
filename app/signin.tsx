@@ -45,6 +45,7 @@ export default function Index() {
         placeholder="password"
         placeholderTextColor="rgb(50,50,50)"
         onChangeText={(value) => setPassword(value)}
+        autoCapitalize="none"
         style={{
           height: 50,
           borderColor: "blue",
