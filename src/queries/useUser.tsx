@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsRestoring,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useRouter } from "expo-router";
 
@@ -21,7 +26,7 @@ type UserInfo = {
   };
 };
 
-// Query function for signing in the user
+// Mutation function for signing in the user
 const loginUserFn = async (
   email: string,
   password: string
@@ -43,7 +48,7 @@ const loginUserFn = async (
   return response.json();
 };
 
-// Mutation function for getting user/view
+// Query function for getting user/view
 const userInfoFn = async (token: string): Promise<UserInfo> => {
   const response = await fetch(
     "http://api.controldejornadalaboral.loc:8080/user/view",
@@ -65,20 +70,20 @@ const userInfoFn = async (token: string): Promise<UserInfo> => {
 // Mutation for user/login
 const useSignIn = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       loginUserFn(email, password),
     onSuccess: async (data) => {
       await queryClient.setQueryData(["token"], data.data.access_token);
-      queryClient.invalidateQueries({
-        queryKey: ["userInfo"],
-      });
+      router.replace("/(app)/(authenticated)/");
     },
     onError: (err) => {
       alert(err);
     },
   });
+  return { signIn: mutation.mutate };
 };
 
 // Clears the queries and sets token to null, this will trigger a redirect back to the sign in page
@@ -88,10 +93,10 @@ const useSignOut = () => {
     queryClient.invalidateQueries({ queryKey: ["userInfo"] });
     queryClient.removeQueries({ queryKey: ["userInfo"] });
 
-    queryClient.invalidateQueries({ queryKey: ["token"] });
     queryClient.setQueryData(["token"], null);
   };
 };
+
 // Query that gets user/view
 const useUserView = () => {
   const token = useQueryClient().getQueryData<string>(["token"]);
@@ -108,11 +113,13 @@ const useUserView = () => {
 const useUserInfo = () => {
   const { data, isFetching } = useUserView();
   const token = useQueryClient().getQueryData<string>(["token"]);
+  const isRestoringToken = useIsRestoring();
 
   return {
     isLoggedIn: !!token,
+    isRestoringToken,
     token: token ?? null,
-    isLoading: isFetching,
+    isLoading: isFetching, // This could be isPending so it's true when initially loading data but doesn't flip on every refetch after that
     rol: data?.data.rol ?? null,
     usuarioId: data?.data.id ?? null,
     empresaId: data?.empresa.empresa_id ?? null,
@@ -128,13 +135,13 @@ const useRedirectByRol = () => {
     if (data.rol !== null) {
       switch (data.rol) {
         case 0:
-          router.replace("/(app)/(worker)/");
+          router.replace("/(app)/(authenticated)/(worker)/");
           break;
         case 1:
-          router.replace("/(app)/(admin)/");
+          router.replace("/(app)/(authenticated)/(admin)/");
           break;
         case 2:
-          router.replace("/(app)/(manager)/");
+          router.replace("/(app)/(authenticated)/(manager)/");
           break;
         case 4:
           alert("pin not supported");
@@ -145,22 +152,12 @@ const useRedirectByRol = () => {
   }, [data.rol]);
 };
 
-// Redirects user on successful sign in
-const useRedirectOnSignIn = () => {
+// This is just to "collect" functions and data and export them as one hook
+const useUser = () => {
+  const { signIn } = useSignIn();
+  const signOut = useSignOut();
   const data = useUserInfo();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (data.token) {
-      router.replace("/(app)/");
-    }
-  }, [data.token]);
+  return { signIn, signOut, data };
 };
 
-export {
-  useSignIn,
-  useSignOut,
-  useUserInfo,
-  useRedirectByRol,
-  useRedirectOnSignIn,
-};
+export { useUser, useRedirectByRol };

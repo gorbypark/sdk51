@@ -1,24 +1,17 @@
 import { View, TextInput, Button, Text } from "react-native";
 import { useState } from "react";
 
-import {
-  useSignIn,
-  useUserInfo,
-  useRedirectOnSignIn,
-} from "@/src/queries/useUser";
+import { useUser } from "@/src/queries/useUser";
 
 export default function Index() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-  const { mutate } = useSignIn();
-  const data = useUserInfo();
+  const { signIn, data } = useUser();
 
   const handleLogin = () => {
-    mutate({ email, password });
+    signIn({ email, password });
   };
-
-  useRedirectOnSignIn();
 
   return (
     <View

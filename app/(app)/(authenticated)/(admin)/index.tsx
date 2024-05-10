@@ -1,15 +1,14 @@
 import { View, Text, Button } from "react-native";
 
-import { useUserInfo, useSignOut } from "@/src/queries/useUser";
+import { useUser } from "@/src/queries/useUser";
 
 export default function Index() {
-  const data = useUserInfo();
-  const signOut = useSignOut();
+  const { signOut, data } = useUser();
 
   return (
     <View style={{ padding: 100 }}>
       <Text style={{ fontWeight: "800" }}>
-        This is a protected route (WORKER rol)
+        This is a protected route (ADMIN rol)
       </Text>
       <Text>{JSON.stringify(data, null, 2)}</Text>
       <Button onPress={() => signOut()} title="Sign Out" />

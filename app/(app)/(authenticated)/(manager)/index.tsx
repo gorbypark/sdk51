@@ -1,10 +1,9 @@
 import { View, Text, Button } from "react-native";
 
-import { useUserInfo, useSignOut } from "@/src/queries/useUser";
+import { useUser } from "@/src/queries/useUser";
 
 export default function Index() {
-  const data = useUserInfo();
-  const signOut = useSignOut();
+  const { signOut, data } = useUser();
 
   return (
     <View style={{ padding: 100 }}>
